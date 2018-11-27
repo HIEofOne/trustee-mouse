@@ -1,0 +1,10 @@
+[Unit]
+Description=My Trustee Service
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Trustee/9stats.py > /home/pi/trustee.log 2>&1
+
+[Install]
+WantedBy=multi-user.target
