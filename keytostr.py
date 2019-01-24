@@ -1,12 +1,11 @@
-# Copyright (c) 2018 HIE of One, PBC
-# Author: Adrian Gropper
-# with thanks to Adafruit Industries for their inspiration, support, education and the SSD1306 drivers
-# This is licensed as Free software under the GNU Affero General Public License
-
 # AG simple input string handling routines
 #
 # Ref: https://developers.google.com/edu/python/dict-files
 #
+
+from PIL import ImageFont
+from PIL import ImageDraw
+
 kmap = {}				# always returns a single char
 kmap['space']	= ' '
 kmap['dot']		= '.'
@@ -59,24 +58,36 @@ kmap['backslash'] = '\\'
 kmap['BACKSLASH'] = '|'
 kmap['capslock'] = ' '
 kmap['CAPSLOCK'] = ' '
+kmap['1S'] = '!'
+kmap['2S'] = '@'
+kmap['3S'] = '#'
+kmap['4S'] = '$'
+kmap['5S'] = '%'
+kmap['6S'] = '^'
+kmap['7S'] = '&'
+kmap['8S'] = '*'
+kmap['9S'] = '('
+kmap['0S'] = ')'
 
-_CURW = 6   # Careful, this cursor width is also defined in the calling routine
 
-def dokey(keystring, key, cindex, cx):
+def dokey(keystring, key, shifted, cindex):
+	
 # backspace needs to index 
+#	print ' in keytostr ', key, shifted
+	if shifted and len(key) == 1:							# this is a number key
+		key = key + 'S'										# and it needs mapping
 	if key == 'backspace':
 		if cindex:
 			cindex -= 1
-			cx = cindex * _CURW
 			keystring = keystring[:-1]
-		return keystring, cindex, cx
+		return keystring, cindex
 # this will need a table of keynames to chars
 	elif kmap.get(key):
 		key = kmap.get(key)
 	else:
-		if len(key) > 1:
+		if len(key) > 1:									# most keys are reported as a single, capital letter 
 			print (key, " not in dictionary")
-			f = open('/home/pi/wifi/keymap.txt', 'a')		# use this to update the dictionary
+			f = open('/home/pi/wifi/keymap.txt', 'a')		# use this file to update the dictionary
 			addone = 'kmap[\'' + key + "\'] = \' \'\n"
 			f.write(addone)
 			key = '?'					# dictionary lookup failed
@@ -86,6 +97,7 @@ def dokey(keystring, key, cindex, cx):
 	l = list(keystring)     		# split string in array
 	l[cindex] = key					# add the key to the array
 	keystring = "".join(l)
+#	print keystring, cindex
 	cindex += 1						# and move the cursor
-	cx = cindex * _CURW
-	return keystring, cindex, cx
+	
+	return keystring, cindex
